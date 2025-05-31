@@ -47,7 +47,7 @@ const StepSidebar: React.FC<StepSidebarProps> = ({
                 <div className="mr-3 mt-0.5">
                   {isCompleted ? (
                     <div className="w-6 h-6 rounded-full bg-teal-500 flex items-center justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg xmlns="http://www.w3.org/2000/svg\" width="16\" height="16\" viewBox="0 0 24 24\" fill="none\" stroke="white\" strokeWidth="2\" strokeLinecap="round\" strokeLinejoin="round">
                         <polyline points="20 6 9 17 4 12"></polyline>
                       </svg>
                     </div>
