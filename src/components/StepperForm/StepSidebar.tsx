@@ -7,6 +7,7 @@ interface StepSidebarProps {
   onStepClick: (index: number) => void;
   title: string;
   description: string;
+  visitedSteps: Set<number>;
 }
 
 const StepSidebar: React.FC<StepSidebarProps> = ({
@@ -15,6 +16,7 @@ const StepSidebar: React.FC<StepSidebarProps> = ({
   onStepClick,
   title,
   description,
+  visitedSteps,
 }) => {
   return (
     <div className="p-8 h-full">
@@ -24,25 +26,28 @@ const StepSidebar: React.FC<StepSidebarProps> = ({
       <div className="space-y-4">
         {steps.map((step, index) => {
           const isActive = index === currentStepIndex;
-          const isCompleted = index < currentStepIndex;
+          const isCompleted = visitedSteps.has(index) && index < currentStepIndex;
+          const isClickable = visitedSteps.has(index) || index === Math.min(...Array.from(visitedSteps)) + 1;
           
           return (
             <div
               key={step.id}
-              className={`p-4 rounded-lg cursor-pointer transition-colors duration-200 ${
+              className={`p-4 rounded-lg transition-colors duration-200 ${
+                isClickable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+              } ${
                 isActive 
                   ? 'bg-teal-50/10' 
                   : isCompleted 
                     ? 'bg-teal-50/5' 
                     : 'bg-transparent hover:bg-white/5'
               }`}
-              onClick={() => onStepClick(index)}
+              onClick={() => isClickable && onStepClick(index)}
             >
               <div className="flex items-start">
                 <div className="mr-3 mt-0.5">
                   {isCompleted ? (
                     <div className="w-6 h-6 rounded-full bg-teal-500 flex items-center justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg\" width="16\" height="16\" viewBox="0 0 24 24\" fill="none\" stroke="white\" strokeWidth="2\" strokeLinecap="round\" strokeLinejoin="round">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="20 6 9 17 4 12"></polyline>
                       </svg>
                     </div>
