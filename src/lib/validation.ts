@@ -6,7 +6,7 @@ const uriSchema = Joi.string().uri();
 // Schema for personal details
 export const personalDetailsSchema = Joi.object({
   name: Joi.string().required().min(2).max(100),
-  email: Joi.string().required().email(),
+  email: Joi.string().required().email({ tlds: { allow: false } }),
   mobile: Joi.string().required().pattern(/^\+?[\d\s-]{10,}$/),
   linkedin: uriSchema.optional(),
   github: uriSchema.optional(),
