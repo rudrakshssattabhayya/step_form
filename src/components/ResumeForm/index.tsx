@@ -6,7 +6,7 @@ import Education from './steps/Education';
 import WorkExperience from './steps/WorkExperience';
 import SkillsAndCertificates from './steps/SkillsAndCertificates';
 import StepperForm, { FormStep } from '../StepperForm/StepperForm';
-import { resumeSchema } from '../../lib/validation';
+import { personalDetailsSchema, objectiveSchema, educationSchema, workExperienceSchema, skillsAndCertificatesSchema } from '../../lib/validation';
 
 const steps: FormStep[] = [
   {
@@ -16,10 +16,11 @@ const steps: FormStep[] = [
     component: <PersonalDetails />,
     validate: () => {
       try {
-        resumeSchema.validateSync({
-          personal_details: useResumeStore.getState().data.personal_details
-        });
-        return null;
+        const { error } = personalDetailsSchema.validate(
+          useResumeStore.getState().data.personal_details,
+          { abortEarly: false }
+        );
+        return error ? error.message : null;
       } catch (error) {
         return error.message;
       }
@@ -32,10 +33,11 @@ const steps: FormStep[] = [
     component: <Objective />,
     validate: () => {
       try {
-        resumeSchema.validateSync({
-          objective: useResumeStore.getState().data.objective
-        });
-        return null;
+        const { error } = objectiveSchema.validate(
+          useResumeStore.getState().data.objective,
+          { abortEarly: false }
+        );
+        return error ? error.message : null;
       } catch (error) {
         return error.message;
       }
@@ -48,10 +50,11 @@ const steps: FormStep[] = [
     component: <Education />,
     validate: () => {
       try {
-        resumeSchema.validateSync({
-          education: useResumeStore.getState().data.education
-        });
-        return null;
+        const { error } = educationSchema.validate(
+          useResumeStore.getState().data.education,
+          { abortEarly: false }
+        );
+        return error ? error.message : null;
       } catch (error) {
         return error.message;
       }
@@ -64,10 +67,11 @@ const steps: FormStep[] = [
     component: <WorkExperience />,
     validate: () => {
       try {
-        resumeSchema.validateSync({
-          work_experiences: useResumeStore.getState().data.work_experiences
-        });
-        return null;
+        const { error } = workExperienceSchema.validate(
+          useResumeStore.getState().data.work_experiences,
+          { abortEarly: false }
+        );
+        return error ? error.message : null;
       } catch (error) {
         return error.message;
       }
@@ -80,10 +84,11 @@ const steps: FormStep[] = [
     component: <SkillsAndCertificates />,
     validate: () => {
       try {
-        resumeSchema.validateSync({
-          skills_and_certificates: useResumeStore.getState().data.skills_and_certificates
-        });
-        return null;
+        const { error } = skillsAndCertificatesSchema.validate(
+          useResumeStore.getState().data.skills_and_certificates,
+          { abortEarly: false }
+        );
+        return error ? error.message : null;
       } catch (error) {
         return error.message;
       }
@@ -96,7 +101,11 @@ const ResumeForm: React.FC = () => {
 
   const handleComplete = async (formData: any) => {
     try {
-      await resumeSchema.validate(formData);
+      const { error } = resumeSchema.validate(formData, { abortEarly: false });
+      if (error) {
+        console.error('Validation error:', error);
+        return;
+      }
       console.log('Form submitted successfully:', formData);
       // Here you would typically send the data to your backend
     } catch (error) {
