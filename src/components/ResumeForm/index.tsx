@@ -5,55 +5,124 @@ import Objective from './steps/Objective';
 import Education from './steps/Education';
 import WorkExperience from './steps/WorkExperience';
 import SkillsAndCertificates from './steps/SkillsAndCertificates';
-import StepNavigation from './StepNavigation';
-import StepProgress from './StepProgress';
+import StepperForm, { FormStep } from '../StepperForm/StepperForm';
+import { personalDetailsSchema, objectiveSchema, educationSchema, workExperienceSchema, skillsAndCertificatesSchema } from '../../lib/validation';
 
-const steps = [
+const steps: FormStep[] = [
   {
+    id: 'personal-details',
     title: 'Personal Details',
-    component: PersonalDetails
+    description: 'Basic information about you',
+    component: <PersonalDetails />,
+    validate: () => {
+      try {
+        const { error } = personalDetailsSchema.validate(
+          useResumeStore.getState().data.personal_details,
+          { abortEarly: false }
+        );
+        return error ? error.message : null;
+      } catch (error) {
+        return error.message;
+      }
+    }
   },
   {
-    title: 'Objective',
-    component: Objective
+    id: 'objective',
+    title: 'Career Objective',
+    description: 'Your career goals and aspirations',
+    component: <Objective />,
+    validate: () => {
+      try {
+        const { error } = objectiveSchema.validate(
+          useResumeStore.getState().data.objective,
+          { abortEarly: false }
+        );
+        return error ? error.message : null;
+      } catch (error) {
+        return error.message;
+      }
+    }
   },
   {
+    id: 'education',
     title: 'Education',
-    component: Education
+    description: 'Your academic background',
+    component: <Education />,
+    validate: () => {
+      try {
+        const { error } = educationSchema.validate(
+          useResumeStore.getState().data.education,
+          { abortEarly: false }
+        );
+        return error ? error.message : null;
+      } catch (error) {
+        return error.message;
+      }
+    }
   },
   {
+    id: 'work-experience',
     title: 'Work Experience',
-    component: WorkExperience
+    description: 'Your professional experience',
+    component: <WorkExperience />,
+    validate: () => {
+      try {
+        const { error } = workExperienceSchema.validate(
+          useResumeStore.getState().data.work_experiences,
+          { abortEarly: false }
+        );
+        return error ? error.message : null;
+      } catch (error) {
+        return error.message;
+      }
+    }
   },
   {
+    id: 'skills',
     title: 'Skills & Certificates',
-    component: SkillsAndCertificates
+    description: 'Your skills and certifications',
+    component: <SkillsAndCertificates />,
+    validate: () => {
+      try {
+        const { error } = skillsAndCertificatesSchema.validate(
+          useResumeStore.getState().data.skills_and_certificates,
+          { abortEarly: false }
+        );
+        return error ? error.message : null;
+      } catch (error) {
+        return error.message;
+      }
+    }
   }
 ];
 
 const ResumeForm: React.FC = () => {
-  const { currentStep, setStep } = useResumeStore();
-  const CurrentStepComponent = steps[currentStep].component;
+  const { data, reset } = useResumeStore();
+
+  const handleComplete = async (formData: any) => {
+    try {
+      const { error } = resumeSchema.validate(formData, { abortEarly: false });
+      if (error) {
+        console.error('Validation error:', error);
+        return;
+      }
+      console.log('Form submitted successfully:', formData);
+      // Here you would typically send the data to your backend
+    } catch (error) {
+      console.error('Validation error:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="p-6">
-            <StepProgress steps={steps} currentStep={currentStep} />
-            
-            <div className="mt-8">
-              <CurrentStepComponent />
-            </div>
-            
-            <StepNavigation 
-              currentStep={currentStep}
-              totalSteps={steps.length}
-              onNext={() => setStep(Math.min(currentStep + 1, steps.length - 1))}
-              onPrev={() => setStep(Math.max(currentStep - 1, 0))}
-            />
-          </div>
-        </div>
+      <div className="max-w-6xl mx-auto px-4">
+        <StepperForm
+          steps={steps}
+          onComplete={handleComplete}
+          initialData={data}
+          title="Resume Builder"
+          description="Create your professional resume step by step"
+        />
       </div>
     </div>
   );

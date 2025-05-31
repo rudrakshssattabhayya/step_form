@@ -30,6 +30,7 @@ const StepperForm: React.FC<StepperFormProps> = ({
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [formData, setFormData] = useState(initialData);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [visitedSteps, setVisitedSteps] = useState<Set<number>>(new Set([0]));
 
   const updateFormData = useCallback((stepData: Record<string, any>) => {
     setFormData((prevData) => ({
@@ -39,35 +40,38 @@ const StepperForm: React.FC<StepperFormProps> = ({
   }, []);
 
   const currentStep = useMemo(() => steps[currentStepIndex], [steps, currentStepIndex]);
-  
-  const validateCurrentStep = useCallback(() => {
-    if (currentStep.validate) {
-      const error = currentStep.validate();
+
+  const validateStep = useCallback((stepIndex: number) => {
+    const step = steps[stepIndex];
+    if (step.validate) {
+      const error = step.validate();
       if (error) {
         setErrors((prevErrors) => ({
           ...prevErrors,
-          [currentStep.id]: error,
+          [step.id]: error,
         }));
         return false;
       }
     }
     setErrors((prevErrors) => {
       const newErrors = { ...prevErrors };
-      delete newErrors[currentStep.id];
+      delete newErrors[step.id];
       return newErrors;
     });
     return true;
-  }, [currentStep]);
+  }, [steps]);
 
   const handleNext = useCallback(() => {
-    if (!validateCurrentStep()) return;
-    
+    if (!validateStep(currentStepIndex)) return;
+
     if (currentStepIndex < steps.length - 1) {
-      setCurrentStepIndex(currentStepIndex + 1);
+      const nextIndex = currentStepIndex + 1;
+      setVisitedSteps(prev => new Set(prev).add(nextIndex));
+      setCurrentStepIndex(nextIndex);
     } else {
       onComplete(formData);
     }
-  }, [currentStepIndex, steps.length, validateCurrentStep, onComplete, formData]);
+  }, [currentStepIndex, steps.length, validateStep, onComplete, formData]);
 
   const handlePrevious = useCallback(() => {
     if (currentStepIndex > 0) {
@@ -76,10 +80,17 @@ const StepperForm: React.FC<StepperFormProps> = ({
   }, [currentStepIndex]);
 
   const handleGoToStep = useCallback((index: number) => {
-    if (index <= currentStepIndex || validateCurrentStep()) {
+    // Only allow navigation to visited steps or the next unvisited step
+    if (visitedSteps.has(index) || index === Math.min(...Array.from(visitedSteps)) + 1) {
+      if (index > currentStepIndex) {
+        // Validate all steps up to the target step
+        for (let i = currentStepIndex; i < index; i++) {
+          if (!validateStep(i)) return;
+        }
+      }
       setCurrentStepIndex(index);
     }
-  }, [currentStepIndex, validateCurrentStep]);
+  }, [currentStepIndex, validateStep, visitedSteps]);
 
   const CurrentStepComponent = useMemo(() => {
     const StepComponent = currentStep.component;
@@ -102,6 +113,7 @@ const StepperForm: React.FC<StepperFormProps> = ({
           onStepClick={handleGoToStep}
           title={title}
           description={description}
+          visitedSteps={visitedSteps}
         />
       </div>
       
@@ -114,6 +126,12 @@ const StepperForm: React.FC<StepperFormProps> = ({
           <h2 className="text-3xl font-bold mb-6 text-gray-900">
             {currentStep.title}
           </h2>
+          
+          {errors[currentStep.id] && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+              {errors[currentStep.id]}
+            </div>
+          )}
           
           {CurrentStepComponent}
         </div>
