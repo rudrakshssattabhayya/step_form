@@ -5,55 +5,115 @@ import Objective from './steps/Objective';
 import Education from './steps/Education';
 import WorkExperience from './steps/WorkExperience';
 import SkillsAndCertificates from './steps/SkillsAndCertificates';
-import StepNavigation from './StepNavigation';
-import StepProgress from './StepProgress';
+import StepperForm, { FormStep } from '../StepperForm/StepperForm';
+import { resumeSchema } from '../../lib/validation';
 
-const steps = [
+const steps: FormStep[] = [
   {
+    id: 'personal-details',
     title: 'Personal Details',
-    component: PersonalDetails
+    description: 'Basic information about you',
+    component: <PersonalDetails />,
+    validate: () => {
+      try {
+        resumeSchema.validateSync({
+          personal_details: useResumeStore.getState().data.personal_details
+        });
+        return null;
+      } catch (error) {
+        return error.message;
+      }
+    }
   },
   {
-    title: 'Objective',
-    component: Objective
+    id: 'objective',
+    title: 'Career Objective',
+    description: 'Your career goals and aspirations',
+    component: <Objective />,
+    validate: () => {
+      try {
+        resumeSchema.validateSync({
+          objective: useResumeStore.getState().data.objective
+        });
+        return null;
+      } catch (error) {
+        return error.message;
+      }
+    }
   },
   {
+    id: 'education',
     title: 'Education',
-    component: Education
+    description: 'Your academic background',
+    component: <Education />,
+    validate: () => {
+      try {
+        resumeSchema.validateSync({
+          education: useResumeStore.getState().data.education
+        });
+        return null;
+      } catch (error) {
+        return error.message;
+      }
+    }
   },
   {
+    id: 'work-experience',
     title: 'Work Experience',
-    component: WorkExperience
+    description: 'Your professional experience',
+    component: <WorkExperience />,
+    validate: () => {
+      try {
+        resumeSchema.validateSync({
+          work_experiences: useResumeStore.getState().data.work_experiences
+        });
+        return null;
+      } catch (error) {
+        return error.message;
+      }
+    }
   },
   {
+    id: 'skills',
     title: 'Skills & Certificates',
-    component: SkillsAndCertificates
+    description: 'Your skills and certifications',
+    component: <SkillsAndCertificates />,
+    validate: () => {
+      try {
+        resumeSchema.validateSync({
+          skills_and_certificates: useResumeStore.getState().data.skills_and_certificates
+        });
+        return null;
+      } catch (error) {
+        return error.message;
+      }
+    }
   }
 ];
 
 const ResumeForm: React.FC = () => {
-  const { currentStep, setStep } = useResumeStore();
-  const CurrentStepComponent = steps[currentStep].component;
+  const { data, reset } = useResumeStore();
+
+  const handleComplete = async (formData: any) => {
+    try {
+      await resumeSchema.validate(formData);
+      console.log('Form submitted successfully:', formData);
+      // Here you would typically send the data to your backend
+    } catch (error) {
+      console.error('Validation error:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="p-6">
-            <StepProgress steps={steps} currentStep={currentStep} />
-            
-            <div className="mt-8">
-              <CurrentStepComponent />
-            </div>
-            
-            <StepNavigation 
-              currentStep={currentStep}
-              totalSteps={steps.length}
-              onNext={() => setStep(Math.min(currentStep + 1, steps.length - 1))}
-              onPrev={() => setStep(Math.max(currentStep - 1, 0))}
-            />
-          </div>
-        </div>
+      <div className="max-w-6xl mx-auto px-4">
+        <StepperForm
+          steps={steps}
+          onComplete={handleComplete}
+          initialData={data}
+          title="Resume Builder"
+          description="Create your professional resume step by step"
+        />
       </div>
     </div>
   );
