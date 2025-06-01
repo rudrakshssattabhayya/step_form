@@ -80,10 +80,8 @@ const StepperForm: React.FC<StepperFormProps> = ({
   }, [currentStepIndex]);
 
   const handleGoToStep = useCallback((index: number) => {
-    // Only allow navigation to visited steps or the next unvisited step
     if (visitedSteps.has(index) || index === Math.min(...Array.from(visitedSteps)) + 1) {
       if (index > currentStepIndex) {
-        // Validate all steps up to the target step
         for (let i = currentStepIndex; i < index; i++) {
           if (!validateStep(i)) return;
         }
@@ -106,7 +104,7 @@ const StepperForm: React.FC<StepperFormProps> = ({
 
   return (
     <div className={`flex flex-col lg:flex-row rounded-xl overflow-hidden bg-white shadow-xl ${className}`}>
-      <div className="w-full lg:w-2/5 xl:w-1/3 bg-[#0c1b33]">
+      <div className="w-full lg:w-1/3 xl:w-1/4 bg-[#0c1b33] min-h-[300px] lg:min-h-[600px]">
         <StepSidebar
           steps={steps}
           currentStepIndex={currentStepIndex}
@@ -117,8 +115,8 @@ const StepperForm: React.FC<StepperFormProps> = ({
         />
       </div>
       
-      <div className="flex flex-col w-full lg:w-3/5 xl:w-2/3">
-        <div className="flex-1 p-6 md:p-8">
+      <div className="flex flex-col w-full lg:w-2/3 xl:w-3/4">
+        <div className="flex-1 p-6 md:p-8 overflow-y-auto">
           <div className="mb-3 text-blue-600 font-medium">
             Step {currentStepIndex + 1} of {steps.length}
           </div>
@@ -133,7 +131,9 @@ const StepperForm: React.FC<StepperFormProps> = ({
             </div>
           )}
           
-          {CurrentStepComponent}
+          <div className="max-w-3xl">
+            {CurrentStepComponent}
+          </div>
         </div>
         
         <div className="mt-auto">

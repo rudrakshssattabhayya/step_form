@@ -97,7 +97,7 @@ const steps: FormStep[] = [
 ];
 
 const ResumeForm: React.FC = () => {
-  const { data, reset } = useResumeStore();
+  const { data } = useResumeStore();
 
   const handleComplete = async (formData: any) => {
     try {
@@ -107,15 +107,14 @@ const ResumeForm: React.FC = () => {
         return;
       }
       console.log('Form submitted successfully:', formData);
-      // Here you would typically send the data to your backend
     } catch (error) {
       console.error('Validation error:', error);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-[1400px] mx-auto px-4 py-8">
         <StepperForm
           steps={steps}
           onComplete={handleComplete}
