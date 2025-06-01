@@ -48,9 +48,7 @@ const TextField: React.FC<TextFieldProps> = ({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
-        className={`w-full px-4 py-2.5 rounded-lg border ${
-          error ? 'border-red-500' : 'border-gray-300'
-        } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200`}
+        className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
       />
       {error && <p className="mt-1 text-red-500 text-sm">{error}</p>}
     </div>
