@@ -31,12 +31,10 @@ export const personalDetailsSchema = Joi.object({
   })
 });
 
-// Schema for objective section
+// Schema for objective section - updated to only require description
 export const objectiveSchema = Joi.object({
-  description: Joi.string().required().min(50).max(500).messages({
-    'string.empty': 'Career objective is required',
-    'string.min': 'Career objective must be at least 50 characters long',
-    'string.max': 'Career objective cannot exceed 500 characters'
+  description: Joi.string().required().messages({
+    'string.empty': 'Career objective is required'
   }),
   bolds: Joi.object().optional(),
   hyperlinks: Joi.object().optional()

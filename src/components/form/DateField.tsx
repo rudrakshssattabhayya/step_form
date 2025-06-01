@@ -23,6 +23,7 @@ const DateField: React.FC<DateFieldProps> = ({
 }) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [isYearSelectOpen, setIsYearSelectOpen] = useState(false);
   const calendarRef = useRef<HTMLDivElement>(null);
   
   const selectedDate = value ? new Date(value) : null;
@@ -30,8 +31,6 @@ const DateField: React.FC<DateFieldProps> = ({
   useEffect(() => {
     if (selectedDate) {
       setCurrentMonth(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1));
-    } else {
-      setCurrentMonth(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
     }
   }, [selectedDate]);
 
@@ -39,6 +38,7 @@ const DateField: React.FC<DateFieldProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
         setIsCalendarOpen(false);
+        setIsYearSelectOpen(false);
       }
     };
 
@@ -54,6 +54,19 @@ const DateField: React.FC<DateFieldProps> = ({
 
   const getFirstDayOfMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  };
+
+  const getYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = currentYear - 50; i <= currentYear + 10; i++) {
+      years.push(i);
+    }
+    return years;
+  };
+
+  const handleDateSelect = (date: Date) => {
+    onChange(date.toISOString().split('T')[0]);
   };
 
   const renderCalendar = () => {
@@ -82,10 +95,7 @@ const DateField: React.FC<DateFieldProps> = ({
       days.push(
         <div 
           key={`day-${day}`} 
-          onClick={() => {
-            onChange(date.toISOString().split('T')[0]);
-            setIsCalendarOpen(false);
-          }}
+          onClick={() => handleDateSelect(date)}
           className={`h-8 w-8 flex items-center justify-center rounded-full cursor-pointer text-sm
             ${isSelected ? 'bg-blue-600 text-white' : isToday ? 'bg-blue-100 text-blue-800' : 'hover:bg-gray-100'}`}
         >
@@ -153,7 +163,7 @@ const DateField: React.FC<DateFieldProps> = ({
         
         {isCalendarOpen && (
           <div className="absolute z-20 mt-1 p-3 bg-white border border-gray-300 rounded-lg shadow-lg">
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex justify-between items-center mb-2 relative">
               <button 
                 onClick={prevMonth}
                 className="p-1 rounded-full hover:bg-gray-100"
@@ -162,8 +172,14 @@ const DateField: React.FC<DateFieldProps> = ({
                   <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
               </button>
-              <div className="font-medium">
+              <div 
+                className="font-medium cursor-pointer flex items-center gap-1"
+                onClick={() => setIsYearSelectOpen(!isYearSelectOpen)}
+              >
                 {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform ${isYearSelectOpen ? 'rotate-180' : ''}`}>
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
               </div>
               <button 
                 onClick={nextMonth}
@@ -174,6 +190,25 @@ const DateField: React.FC<DateFieldProps> = ({
                 </svg>
               </button>
             </div>
+
+            {isYearSelectOpen && (
+              <div className="absolute top-14 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto z-30">
+                {getYearOptions().map((year) => (
+                  <div
+                    key={year}
+                    className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${
+                      year === currentMonth.getFullYear() ? 'bg-blue-50 text-blue-600' : ''
+                    }`}
+                    onClick={() => {
+                      setCurrentMonth(new Date(year, currentMonth.getMonth(), 1));
+                      setIsYearSelectOpen(false);
+                    }}
+                  >
+                    {year}
+                  </div>
+                ))}
+              </div>
+            )}
             
             <div className="grid grid-cols-7 gap-1 mb-2">
               {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
